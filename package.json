@@ -1,0 +1,27 @@
+{
+  "name": "diberr-graphql",
+  "version": "1.0.0",
+  "description": "A data mock in graphql for Diberr",
+  "main": "index.js",
+  "author": "Akinmade Bond <bond@jeman.org>",
+  "license": "MIT",
+  "scripts": {
+    "prestart": "npm run compile",
+    "start": "node index.js",
+    "compile": "babel src/ -d lib"
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "express-graphql": "^0.5.4",
+    "graphql": "^0.7.2",
+    "lodash": "^4.16.6"
+  },
+  "devDependencies": {
+    "@types/express-graphql": "^0.0.33",
+    "@types/graphql": "^0.7.2",
+    "@types/lodash": "^4.14.38",
+    "babel-cli": "^6.18.0",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-preset-latest": "^6.16.0"
+  }
+}

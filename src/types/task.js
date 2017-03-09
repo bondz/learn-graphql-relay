@@ -1,10 +1,14 @@
 import {
-    GraphQLNonNull,
     GraphQLObjectType,
     GraphQLString,    
     GraphQLBoolean,
-    GraphQLList,
 } from 'graphql';
+
+import {
+    globalIdField,
+    connectionArgs,
+    connectionFromArray
+} from 'graphql-relay';
 
 import {
     createdField,
@@ -13,17 +17,17 @@ import {
 
 import ProjectType from "./project"; 
 import PersonType from "./person";
+import { nodeInterface } from './connections';
+import PersonConnection from './personConnection';
 
 import { projectsList, peopleList } from "../data";
 
 const TaskType = new GraphQLObjectType({
     name: "Task",
     description: "A single task",
+    interfaces: [nodeInterface],
     fields: () => ({
-        id: {
-            type: new GraphQLNonNull(GraphQLString),
-            description: "An identifier for this task"
-        },
+        id: globalIdField('Task'),
         title: {
             type: GraphQLString,
             description: "The title of this task"
@@ -55,10 +59,14 @@ const TaskType = new GraphQLObjectType({
             }
         },
         assignedTo: {
-            type: new GraphQLList(PersonType),
+            type: PersonConnection,
             description: "The people this tasks are assigned to",
-            resolve: (task) => {
-                return task.assignedTo.map(peopleID => peopleList[peopleID]);
+            args: connectionArgs,
+            resolve: (task, args) => {
+                return connectionFromArray(
+                    task.assignedTo.map(peopleID => peopleList[peopleID]),
+                    args
+                );
             }
         },
         created: createdField(),

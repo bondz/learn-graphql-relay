@@ -1,23 +1,34 @@
 import {
-  GraphQLList,
   GraphQLObjectType,
   GraphQLSchema,
-  GraphQLString,  
-  GraphQLNonNull,  
+  GraphQLString,
+  GraphQLNonNull,
 } from 'graphql';
 
-import { ProjectType, PersonType, TaskType } from "./types";
+import {
+    connectionArgs,
+    connectionFromArray
+} from 'graphql-relay';
+
+import {
+  PersonConnection, ProjectConnection, TaskConnection, PersonType,
+  ProjectType, TaskType, nodeField } from './types';
 import  { projectsList, peopleList, tasksList }  from "./data";
 
 const Query = new GraphQLObjectType({
   name: "DiberrSchema",
   description: "The objects exposed by Dibberr",
   fields: () => ({
+    node: nodeField,
     projects: {
-      type: new GraphQLList(ProjectType),
+      type: ProjectConnection,
       description: "All projects belonging to the authenticated organization",
-      resolve: () => {
-        return projectsList;
+      args: connectionArgs,
+      resolve: (root, args) => {
+        return connectionFromArray(
+          projectsList,
+          args
+        );
       }
     },
     project: {
@@ -34,10 +45,14 @@ const Query = new GraphQLObjectType({
       }
     },
     people: {
-      type: new GraphQLList(PersonType),
+      type: PersonConnection,
       description: "Everyone registered as a user in this organization",
-      resolve: () => {
-        return Object.values(peopleList);
+      args: connectionArgs,
+      resolve: (root, args) => {
+        return connectionFromArray(
+          Object.values(peopleList),
+          args
+        );
       }
     },
     person: {
@@ -54,10 +69,14 @@ const Query = new GraphQLObjectType({
       }
     },
     tasks: {
-      type: new GraphQLList(TaskType),
+      type: TaskConnection,
       description: "The collection of tasks created by this user",
-      resolve: () => {
-        return tasksList;
+      args: connectionArgs,
+      resolve: (root, args) => {
+        return connectionFromArray(
+          tasksList,
+          args
+        );
       }
     },
     task: {

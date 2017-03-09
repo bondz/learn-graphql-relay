@@ -1,28 +1,31 @@
 import {
-  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
-  GraphQLList,
-  GraphQLInt,
 } from 'graphql';
+
+import {
+    globalIdField,
+    connectionArgs,
+    connectionFromArray
+} from 'graphql-relay';
 
 import {
   createdField,  
 } from "../common-fields";
 
-import TaskType from "./task";
-import PersonType from "./person";
+import PersonType from './person';
+import { nodeInterface } from './connections';
+import PersonConnection from './personConnection';
+import TaskConnection from './taskConnection';
 
 import { peopleList, tasksList } from "../data";
 
 const ProjectType = new GraphQLObjectType({
   name: "Project",
   description: "A single project",
+  interfaces: [nodeInterface],
   fields: () => ({
-    id: {
-      type: new GraphQLNonNull(GraphQLString),
-      description: "The identifier for this project"
-    },
+    id: globalIdField('Project'),
     title: {
       type: GraphQLString,
       description: "The title of the project"
@@ -32,26 +35,27 @@ const ProjectType = new GraphQLObjectType({
       description: "The user's description of this project"
     },
     tasks: {
-      type: new GraphQLList(TaskType),
-      args: {
-        limit: {
-          type: GraphQLInt,
-          description: "Limit the number of tasks to return. Default is 10",
-          defaultValue: 10
-        }
-      },
+      type: TaskConnection,
+      args: connectionArgs,
       description: "The tasks under this project",
-      resolve: (project, { limit }) => {        
-        return tasksList.filter(task => task.project === project.id).slice(0, limit);        
+      resolve: (project, args) => {        
+        return connectionFromArray(
+          tasksList.filter(task => task.project === project.id),
+          args
+        );
       }
     },
     managers: {
-      type: new GraphQLList(PersonType),
+      type: PersonConnection,
       description: "The project managers assigned to this project",
-      resolve: (project) => {
-        return project.managers.map(personID => {
-          return peopleList[personID];
-        });        
+      args: connectionArgs,
+      resolve: (project, args) => {
+        return connectionFromArray(
+          project.managers.map(personID => {
+            return peopleList[personID];
+          }),
+          args
+        );
       }
     },
     author: {

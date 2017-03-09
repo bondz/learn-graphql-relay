@@ -1,28 +1,31 @@
 import {
-    GraphQLNonNull,
     GraphQLObjectType,
     GraphQLString,
-    GraphQLList,    
 } from 'graphql';
+
+import {
+    globalIdField,
+    connectionArgs,
+    connectionFromArray
+} from 'graphql-relay';
 
 import {
     createdField,
     editedField,
 } from "../common-fields";
 
-import ProjectType from "./project";
-import TaskType from "./task";
+import ProjectConnection from './projectConnection';
+import TaskConnection from './taskConnection';
+import { nodeInterface } from './connections';
 
 import { projectsList, tasksList } from "../data";
 
 const PersonType = new GraphQLObjectType({
     name: "Person",
     description: "A resource owner",
+    interfaces: [nodeInterface],
     fields: () => ({
-        id: {
-            type: new GraphQLNonNull(GraphQLString),
-            description: "An identifier for this person"
-        },
+        id: globalIdField('Person'),
         email: {
             type: GraphQLString,
             description: "The email address of this person"
@@ -30,7 +33,7 @@ const PersonType = new GraphQLObjectType({
         phone: {
             type: GraphQLString,
             description: "The phone number of this person"
-        },        
+        },
         firstname: {
             type: GraphQLString,
             description: "The first name of this person"
@@ -42,29 +45,41 @@ const PersonType = new GraphQLObjectType({
         fullname: {
             type: GraphQLString,
             description: "The fullname of this person",
-            resolve: (person) => `${person.firstname} ${person.lastname}` 
+            resolve: (person) => `${person.firstname} ${person.lastname}`
         },
         projectsAuthored: {
-            type: new GraphQLList(ProjectType),
+            type: ProjectConnection,
             description: "The projects created by this person",
-            resolve: (person) => {
-                return projectsList.filter(project => project.author === person.id);
+            args: connectionArgs,
+            resolve: (person, args) => {
+                return connectionFromArray(
+                    projectsList.filter(project => project.author === person.id),
+                    args
+                );
             }
         },
         projectsManaging: {
-            type: new GraphQLList(ProjectType),
+            type: ProjectConnection,
             description: "The projects managed by this person",
-            resolve: (person) => {
-                return projectsList.filter(project => project.managers.includes(person.id));
+            args: connectionArgs,
+            resolve: (person, args) => {
+                return connectionFromArray(
+                    projectsList.filter(project => project.managers.includes(person.id)),
+                    args
+                );
             }
         },
         assignedTasks: {
-            type: new GraphQLList(TaskType),
+            type: TaskConnection,
             description: "The tasks assigned to this person",
-            resolve: (person) => {
-                return tasksList.filter(task => task.assignedTo.includes(person.id));
+            args: connectionArgs,
+            resolve: (person, args) => {
+                return connectionFromArray(
+                    tasksList.filter(task => task.assignedTo.includes(person.id)),
+                    args
+                );
             }
-        },        
+        },
         created: createdField(),
         edited: editedField()
     })

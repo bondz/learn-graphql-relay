@@ -14,6 +14,7 @@ import {
     editedField,
 } from "../common-fields";
 
+import { nodeInterface } from './connections';
 import { projectsList, tasksList } from "../data";
 
 const PersonType = new GraphQLObjectType({

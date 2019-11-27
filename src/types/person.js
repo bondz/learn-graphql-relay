@@ -14,17 +14,17 @@ import {
     editedField,
 } from "../common-fields";
 
-import ProjectConnection from './projectConnection';
-import TaskConnection from './taskConnection';
-import { nodeInterface } from './connections';
-
 import { projectsList, tasksList } from "../data";
 
 const PersonType = new GraphQLObjectType({
     name: "Person",
     description: "A resource owner",
     interfaces: [nodeInterface],
-    fields: () => ({
+    fields: () => {
+      const ProjectConnection = require("./projectConnection").default;
+      const TaskConnection = require("./taskConnection").default;
+      
+      return ({
         id: globalIdField('Person'),
         email: {
             type: GraphQLString,
@@ -82,7 +82,8 @@ const PersonType = new GraphQLObjectType({
         },
         created: createdField(),
         edited: editedField()
-    })
+      })
+    }
 });
 
 export default PersonType;

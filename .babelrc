@@ -1,8 +1,5 @@
 {  
   "plugins": [
-    "transform-runtime",
-     "transform-object-rest-spread",     
-     "transform-class-properties"
-  ],
-  "presets": ["latest", "stage-2" ,"react"]
+    "@babel/plugin-transform-modules-commonjs"
+  ]
 }
